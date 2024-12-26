@@ -1,9 +1,9 @@
 <p style="text-align:center;width:100%;"><img src="/art/preview.png" alt="Chatify Laravel Package"></p>
 
 <p align="center">
-<a href="https://github.com/laravel/telescope/actions"><img src="https://poser.pugx.org/munafio/chatify/v/stable?style=flat-square" alt="Build Status"></a>
-<a href="https://packagist.org/packages/munafio/chatify"><img src="https://poser.pugx.org/munafio/chatify/downloads?style=flat-square" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/munafio/chatify"><img src="https://poser.pugx.org/munafio/chatify/license?style=flat-square" alt="License"></a>
+<a href="https://github.com/laravel/telescope/actions"><img src="https://poser.pugx.org/seastandard/chatify/v/stable?style=flat-square" alt="Build Status"></a>
+<a href="https://packagist.org/packages/seastandard/chatify"><img src="https://poser.pugx.org/seastandard/chatify/downloads?style=flat-square" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/seastandard/chatify"><img src="https://poser.pugx.org/seastandard/chatify/license?style=flat-square" alt="License"></a>
 </p>
 
 ## Chatify Laravel Package
