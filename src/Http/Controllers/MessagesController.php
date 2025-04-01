@@ -2,19 +2,23 @@
 
 namespace Chatify\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Response;
-use App\Models\Customer as User;
+use Google_Client;
+use App\Models\Customer;
 use App\Models\User as Admin;
-use App\Models\ChMessage as Message;
-use App\Models\ChFavorite as Favorite;
-use Chatify\Facades\ChatifyMessenger as Chatify;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Request as FacadesRequest;
+use App\Models\FcmTokenKey;
 use Illuminate\Support\Str;
+use App\Models\Customer as User;
+use Illuminate\Http\Request;
+use App\Models\ChMessage as Message;
+use Illuminate\Http\JsonResponse;
+use App\Models\ChFavorite as Favorite;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Response;
+use Chatify\Facades\ChatifyMessenger as Chatify;
+use Illuminate\Support\Facades\Request as FacadesRequest;
 
 class MessagesController extends Controller
 {
@@ -152,6 +156,8 @@ class MessagesController extends Controller
                 'to_id' => $request['id'],
                 'message' => $messageData,
             ]);
+
+            $this->sendPushNotification("New Message!", $request['message'], $request['id']);
         }
 
         // send the response
@@ -483,5 +489,64 @@ class MessagesController extends Controller
         return Response::json([
             'status' => $status,
         ], 200);
+    }
+
+    public function sendPushNotification($title, $message, $customerId = null, $imgUrl = null)
+    {
+        $credentialsFilePath = $_SERVER['DOCUMENT_ROOT'] . '/assets/firebase/fcm-server-key.json';
+        $client = new Google_Client();
+        $client->setAuthConfig($credentialsFilePath);
+        $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
+        $client->refreshTokenWithAssertion();
+        $token = $client->getAccessToken();
+        $access_token = $token['access_token'];
+        $project_id = config('fcm_project_id');
+
+        $url = "https://fcm.googleapis.com/v1/projects/".$project_id."/messages:send";        
+        // Fetch user's FCM tokens
+        $fcmTokens = FcmTokenKey::where('customer_id', $customerId)
+        ->orderBy('id', 'desc')
+        ->pluck('fcm_token_key');
+
+        $notifications = [
+            'title' => $title,
+            'body' => $message,
+        ];
+
+        if ($imgUrl) {
+            $notifications['image'] = $imgUrl;
+        }
+
+        if ($fcmTokens) {
+            foreach ($fcmTokens as $fcmKey) {
+                $data = [
+                    'token' => $fcmKey->token,
+                    'notification' => $notifications,
+                    'apns' => [
+                        'headers' => [
+                            'apns-priority' => '10',
+                        ],
+                        'payload' => [
+                            'aps' => [
+                                'sound' => 'default',
+                            ]
+                        ],
+                    ],
+                    'android' => [
+                        'priority' => 'high',
+                        'notification' => [
+                            'sound' => 'default',
+                        ]
+                    ],
+                ];
+                $response = Http::withHeaders([
+                    'Authorization' => "Bearer $access_token",
+                    'Content-Type' => "application/json"
+                ])->post($url, [
+                    'message' => $data
+                ]);
+                return true;
+            }
+        }
     }
 }
