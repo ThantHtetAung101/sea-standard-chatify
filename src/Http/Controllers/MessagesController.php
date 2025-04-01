@@ -520,7 +520,7 @@ class MessagesController extends Controller
         if ($fcmTokens) {
             foreach ($fcmTokens as $fcmKey) {
                 $data = [
-                    'token' => $fcmKey->token,
+                    'token' => $fcmKey,
                     'notification' => $notifications,
                     'apns' => [
                         'headers' => [
