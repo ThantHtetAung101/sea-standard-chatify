@@ -513,6 +513,10 @@ class MessagesController extends Controller
             'body' => $message,
         ];
 
+        $dataPayload = [
+            'message_id' => "1"
+        ];
+
         if ($imgUrl) {
             $notifications['image'] = $imgUrl;
         }
@@ -522,6 +526,7 @@ class MessagesController extends Controller
                 $data = [
                     'token' => $fcmKey,
                     'notification' => $notifications,
+                    'data'         => $dataPayload,
                     'apns' => [
                         'headers' => [
                             'apns-priority' => '10',
@@ -545,6 +550,8 @@ class MessagesController extends Controller
                 ])->post($url, [
                     'message' => $data
                 ]);
+
+                dd($response->json());
                 return true;
             }
         }
