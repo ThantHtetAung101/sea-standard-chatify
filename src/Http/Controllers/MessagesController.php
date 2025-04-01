@@ -500,7 +500,7 @@ class MessagesController extends Controller
         $client->refreshTokenWithAssertion();
         $token = $client->getAccessToken();
         $access_token = $token['access_token'];
-        $project_id = config('fcm_project_id');
+        $project_id = env('APP_FCM_PROJECT_ID');
 
         $url = "https://fcm.googleapis.com/v1/projects/".$project_id."/messages:send";        
         // Fetch user's FCM tokens
@@ -544,6 +544,7 @@ class MessagesController extends Controller
                         ]
                     ],
                 ];
+
                 $response = Http::withHeaders([
                     'Authorization' => "Bearer $access_token",
                     'Content-Type' => "application/json"
@@ -551,7 +552,6 @@ class MessagesController extends Controller
                     'message' => $data
                 ]);
 
-                dd($response->json());
                 return true;
             }
         }
